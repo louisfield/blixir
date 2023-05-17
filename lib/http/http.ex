@@ -10,8 +10,10 @@ defmodule Blixir.HTTP do
   @callback post(String.t(), list(), list()) ::
               {:ok, {tuple(), list(), String.t()}} | {:error, any()}
   def get(url, headers, options \\ []),
-    do: __MODULE__.Request.get(url, headers, options)
+    do: request().get(url, headers, options)
 
   def post(url, headers, options \\ []),
-    do: __MODULE__.Request.post(url, headers, options)
+    do: request().post(url, headers, options)
+
+  defp request(), do: Application.fetch_env!(:blixir, __MODULE__)
 end
