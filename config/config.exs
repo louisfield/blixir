@@ -1,3 +1,5 @@
 import Config
 
-import_config "#{Mix.env()}.exs"
+config :blixir, Blixir.HTTP, Blixir.HTTP.Request
+
+import_config("#{Mix.env()}.exs")
