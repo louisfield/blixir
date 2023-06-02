@@ -17,6 +17,8 @@ defmodule Blixir.RiotApi.Url do
       |> generate_base_url()
       |> concat_end_of_url(end_url)
       |> inject_api_key()
+      |> URI.encode()
+      |> IO.inspect()
 
   defp generate_base_url(region),
     do: "https://" <> region <> ".api.riotgames.com"
@@ -30,3 +32,5 @@ defmodule Blixir.RiotApi.Url do
   defp auth_token(),
     do: Application.fetch_env!(__MODULE__, :api_key)
 end
+
+Blixir.RiotApi.Summoner.get_summoner_by_name("you are a spoon")
