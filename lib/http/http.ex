@@ -4,6 +4,10 @@ defmodule Blixir.HTTP do
   Holds the behaviour for HTTP
   """
 
+  alias Blixir.RiotApi.Url
+
+  @region "euw1"
+
   @callback get(String.t(), list(), list()) ::
               {:ok, {tuple(), list(), String.t()}} | {:error, any()}
 
@@ -14,6 +18,12 @@ defmodule Blixir.HTTP do
 
   def post(url, headers, options \\ []),
     do: request().post(url, headers, options)
+
+  def prepare_and_get(url, headers \\ []),
+    do:
+      @region
+      |> Url.generate_url(url)
+      |> get(headers)
 
   defp request(), do: Application.fetch_env!(:blixir, __MODULE__)
 end

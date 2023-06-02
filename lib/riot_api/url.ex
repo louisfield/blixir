@@ -9,7 +9,7 @@ defmodule Blixir.RiotApi.Url do
 
     ## Examples
         iex> Blixir.RiotApi.Url.generate_url("euw1", "/test/url")
-        "euw1.api.riotgames.com/test/url?api_key=my_key"
+        "https://euw1.api.riotgames.com/test/url?api_key=my_key"
   """
   def generate_url(region, end_url),
     do:
@@ -19,7 +19,7 @@ defmodule Blixir.RiotApi.Url do
       |> inject_api_key()
 
   defp generate_base_url(region),
-    do: region <> ".api.riotgames.com"
+    do: "https://" <> region <> ".api.riotgames.com"
 
   defp concat_end_of_url(base_url, end_url),
     do: base_url <> end_url
