@@ -18,7 +18,6 @@ defmodule Blixir.RiotApi.Url do
       |> concat_end_of_url(end_url)
       |> inject_api_key()
       |> URI.encode()
-      |> IO.inspect()
 
   defp generate_base_url(region),
     do: "https://" <> region <> ".api.riotgames.com"
