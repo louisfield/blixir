@@ -1,5 +1,5 @@
 defmodule Blixir.RiotApi do
-  alias __MODULE__.{Account, ChampionMastery, Summoner}
+  alias __MODULE__.{Account, ChampionMastery, Summoners}
 
   defdelegate account_by_puuid(puuid), to: Account
   defdelegate account_by_riot_id(game_name, tag_line), to: Account
@@ -14,5 +14,5 @@ defmodule Blixir.RiotApi do
   @spec total_mastery_score(any) :: any
   defdelegate total_mastery_score(encrypted_summoner_id), to: ChampionMastery
 
-  defdelegate get_summoner_by_name(name), to: Summoner
+  defdelegate get_summoner_by_name(name), to: Summoners
 end

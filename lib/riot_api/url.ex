@@ -31,5 +31,3 @@ defmodule Blixir.RiotApi.Url do
   defp auth_token(),
     do: Application.fetch_env!(__MODULE__, :api_key)
 end
-
-Blixir.RiotApi.Summoner.get_summoner_by_name("you are a spoon")

@@ -1,25 +1,8 @@
-defmodule Blixir.RiotApi.Summoner do
+defmodule Blixir.RiotApi.Summoners do
   import Blixir.HTTP, only: [prepare_and_get: 1]
 
-  defstruct [
-    :account_id,
-    :id,
-    :name,
-    :profile_icon_id,
-    :puuid,
-    :revision_date,
-    :summoner_level
-  ]
+  alias __MODULE__.Summoner
 
-  @type t :: %__MODULE__{
-          account_id: String.t(),
-          id: String.t(),
-          name: String.t(),
-          profile_icon_id: integer(),
-          puuid: String.t(),
-          revision_date: DateTime.t(),
-          summoner_level: integer()
-        }
   @ok_resp {'HTTP/1.1', 200, 'OK'}
 
   @spec get_summoner_by_name(any) :: any
@@ -27,7 +10,7 @@ defmodule Blixir.RiotApi.Summoner do
     with {:ok, {@ok_resp, [_ | _], body}} <-
            prepare_and_get("/lol/summoner/v4/summoners/by-name/#{name}"),
          {:ok, body} <- Jason.decode(body),
-         %__MODULE__{} = body <- parse_body(body) do
+         %Summoner{} = body <- parse_body(body) do
       body
     else
       {:error, %Jason.DecodeError{}} ->
@@ -43,7 +26,7 @@ defmodule Blixir.RiotApi.Summoner do
     |> Enum.map(&convert_key_to_camel/1)
     |> Enum.into(%{})
     |> maybe_convert_revision_date()
-    |> then(&struct(__MODULE__, &1))
+    |> then(&struct(Summoner, &1))
   end
 
   defp maybe_convert_revision_date(%{revision_date: revision_date} = summoner)
