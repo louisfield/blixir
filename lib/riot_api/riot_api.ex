@@ -1,19 +1,79 @@
 defmodule Blixir.RiotApi do
-  alias __MODULE__.{Account, ChampionMastery, Summoners}
+  alias __MODULE__.{Accounts, Summoners}
 
-  defdelegate account_by_puuid(puuid), to: Account
-  defdelegate account_by_riot_id(game_name, tag_line), to: Account
-  defdelegate account_by_access_token(token), to: Account
-  defdelegate get_active_shard(game, puuid), to: Account
+  import Blixir.HTTP, only: [prepare_and_get: 3]
 
-  defdelegate all_summoner_masteries(encrypted_summoner_id), to: ChampionMastery
+  @ok_resp {'HTTP/1.1', 200, 'OK'}
 
-  defdelegate mastery_by_champ(encrypted_summoner_id, champ_id), to: ChampionMastery
+  defdelegate account_by_puuid(region, puuid), to: Accounts
+  defdelegate account_by_riot_id(region, game_name, tag_line), to: Accounts
+  defdelegate account_by_access_token(region, token), to: Accounts
+  defdelegate get_active_shard(region, game, puuid), to: Accounts
 
-  defdelegate top_mastery_by_count(encrypted_summoner_id, count \\ 5), to: ChampionMastery
-  @spec total_mastery_score(any) :: any
-  defdelegate total_mastery_score(encrypted_summoner_id), to: ChampionMastery
+  # defdelegate all_summoner_masteries(encrypted_summoner_id), to: ChampionMastery
 
-  @spec get_summoner_by_name(String.t()) :: {:ok, Summoners.Summoner.t()} | {:error, any()}
-  defdelegate get_summoner_by_name(name), to: Summoners
+  # defdelegate mastery_by_champ(encrypted_summoner_id, champ_id), to: ChampionMastery
+
+  # defdelegate top_mastery_by_count(encrypted_summoner_id, count \\ 5), to: ChampionMastery
+  # @spec total_mastery_score(any) :: any
+  # defdelegate total_mastery_score(encrypted_summoner_id), to: ChampionMastery
+
+  @spec get_summoner_by_name(String.t(), String.t()) ::
+          {:ok, Summoners.Summoner.t()} | {:error, any()}
+  defdelegate get_summoner_by_name(region, name), to: Summoners
+
+  @spec fetch_and_parse(atom(), struct(), String.t(), fun(), list()) ::
+          {:ok, struct()} | {:error, any()}
+  @spec fetch_and_parse(atom(), struct(), String.t(), fun()) :: {:ok, struct()} | {:error, any()}
+  @spec fetch_and_parse(atom(), struct(), String.t(), list()) :: {:ok, struct()} | {:error, any()}
+  @spec fetch_and_parse(atom(), struct(), String.t()) :: {:ok, struct()} | {:error, any()}
+
+  def fetch_and_parse(region, struct, url, headers) when is_list(headers) do
+    fetch_and_parse(region, struct, url, &parse_body/2, headers)
+  end
+
+  def fetch_and_parse(region, struct, url, parse_body_callback \\ &parse_body/2, headers \\ []) do
+    with {:ok, {@ok_resp, [_ | _], body}} <-
+           prepare_and_get(region, url, headers),
+         {:ok, body} <- Jason.decode(body),
+         ^struct = body <- run_callback(parse_body_callback, struct, body) do
+      {:ok, body}
+    else
+      {:error, %Jason.DecodeError{}} ->
+        {:error, :error_decoding_response}
+
+      err ->
+        err
+    end
+  end
+
+  defp run_callback(callback, struct, body) do
+    if(callback == (&parse_body/2)) do
+      parse_body(struct, body)
+    else
+      callback.(body)
+    end
+  end
+
+  defp parse_body(struct, body) do
+    body
+    |> Enum.map(&convert_key_to_camel/1)
+    |> Enum.into(%{})
+    |> maybe_into_struct(struct)
+  end
+
+  defp maybe_into_struct({:error, _} = e, _struct), do: e
+
+  defp maybe_into_struct(val, struct),
+    do: struct(struct, val)
+
+  defp convert_key_to_camel(nil),
+    do: nil
+
+  defp convert_key_to_camel({k, v}),
+    do:
+      k
+      |> Macro.underscore()
+      |> String.to_atom()
+      |> then(&{&1, v})
 end

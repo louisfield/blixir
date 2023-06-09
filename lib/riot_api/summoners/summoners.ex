@@ -1,25 +1,18 @@
 defmodule Blixir.RiotApi.Summoners do
-  import Blixir.HTTP, only: [prepare_and_get: 1]
-
   alias __MODULE__.Summoner
 
-  @ok_resp {'HTTP/1.1', 200, 'OK'}
+  @spec get_summoner_by_name(String.t(), String.t()) :: {:ok, Summoner.t()} | {:error, any()}
+  def get_summoner_by_name(region, name),
+    do: fetch_summoner(region, "/lol/summoner/v4/summoners/by-name/#{name}")
 
-  @spec get_summoner_by_name(any) :: any
-  def get_summoner_by_name(name) do
-    with {:ok, {@ok_resp, [_ | _], body}} <-
-           prepare_and_get("/lol/summoner/v4/summoners/by-name/#{name}"),
-         {:ok, body} <- Jason.decode(body),
-         %Summoner{} = body <- parse_body(body) do
-      body
-    else
-      {:error, %Jason.DecodeError{}} ->
-        {:error, :error_decoding_response}
-
-      err ->
-        err
-    end
-  end
+  defp fetch_summoner(region, url),
+    do:
+      Blixir.RiotApi.fetch_and_parse(
+        region,
+        %Summoner{},
+        url,
+        &parse_body/1
+      )
 
   defp parse_body(body) do
     body

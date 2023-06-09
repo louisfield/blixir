@@ -24,17 +24,21 @@ defmodule Blixir.RiotApi.SummonersTest do
     revision_date: ~U[2023-06-06 19:50:56.000Z],
     summoner_level: 424
   }
+
+  @region "euw1"
+
   describe "get_summoner_by_name/1" do
     test "Return summoner correctly when successful HTML request" do
       stub_with_response(@correct_overall_resp)
 
-      assert @correct_output_summoner == Summoners.get_summoner_by_name("test")
+      assert @correct_output_summoner == Summoners.get_summoner_by_name(@region, "test")
     end
 
     test "Return revision date error when no revision date parsed" do
       stub_with_response(@invalid_revision_date)
 
-      assert {:error, :could_not_convert_revision_date} == Summoners.get_summoner_by_name("test")
+      assert {:error, :could_not_convert_revision_date} ==
+               Summoners.get_summoner_by_name(@region, "test")
     end
   end
 
