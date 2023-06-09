@@ -6,6 +6,12 @@ defmodule Blixir.HTTP.Request do
 
   @content_type 'application/json'
 
+  @callback get(String.t(), list(), list()) ::
+              {:ok, {tuple(), list(), String.t()}} | {:error, any()}
+
+  @callback post(String.t(), list(), list()) ::
+              {:ok, {tuple(), list(), String.t()}} | {:error, any()}
+
   @doc """
     Sends a HTTP request with GET method, with parsed url, headers and opts
 

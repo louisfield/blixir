@@ -14,5 +14,6 @@ defmodule Blixir.RiotApi do
   @spec total_mastery_score(any) :: any
   defdelegate total_mastery_score(encrypted_summoner_id), to: ChampionMastery
 
+  @spec get_summoner_by_name(String.t()) :: {:ok, Summoners.Summoner.t()} | {:error, any()}
   defdelegate get_summoner_by_name(name), to: Summoners
 end

@@ -26,8 +26,13 @@ defmodule Blixir.RiotApi.Summoners do
     |> Enum.map(&convert_key_to_camel/1)
     |> Enum.into(%{})
     |> maybe_convert_revision_date()
-    |> then(&struct(Summoner, &1))
+    |> maybe_into_struct()
   end
+
+  defp maybe_into_struct({:error, _} = e), do: e
+
+  defp maybe_into_struct(val),
+    do: struct(Summoner, val)
 
   defp maybe_convert_revision_date(%{revision_date: revision_date} = summoner)
        when not is_nil(revision_date) do
