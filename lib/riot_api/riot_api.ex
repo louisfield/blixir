@@ -1,5 +1,5 @@
 defmodule Blixir.RiotApi do
-  alias __MODULE__.{Accounts, Summoners}
+  alias __MODULE__.{Accounts, Summoners, ChampionMasteries}
 
   import Blixir.HTTP, only: [prepare_and_get: 3]
 
@@ -10,13 +10,14 @@ defmodule Blixir.RiotApi do
   defdelegate account_by_access_token(region, token), to: Accounts
   defdelegate get_active_shard(region, game, puuid), to: Accounts
 
-  # defdelegate all_summoner_masteries(encrypted_summoner_id), to: ChampionMastery
+  defdelegate all_summoner_masteries(region, encrypted_summoner_id), to: ChampionMasteries
 
-  # defdelegate mastery_by_champ(encrypted_summoner_id, champ_id), to: ChampionMastery
+  defdelegate mastery_by_champ(region, encrypted_summoner_id, champ_id), to: ChampionMasteries
 
-  # defdelegate top_mastery_by_count(encrypted_summoner_id, count \\ 5), to: ChampionMastery
-  # @spec total_mastery_score(any) :: any
-  # defdelegate total_mastery_score(encrypted_summoner_id), to: ChampionMastery
+  defdelegate top_mastery_by_count(region, encrypted_summoner_id, count \\ 5),
+    to: ChampionMasteries
+
+  defdelegate total_mastery_score(region, encrypted_summoner_id), to: ChampionMasteries
 
   @spec get_summoner_by_name(String.t(), String.t()) ::
           {:ok, Summoners.Summoner.t()} | {:error, any()}
@@ -55,10 +56,12 @@ defmodule Blixir.RiotApi do
     end
   end
 
+  defp parse_body(struct, body) when is_list(body),
+    do: Enum.map(body, &parse_body(struct, &1))
+
   defp parse_body(struct, body) do
     body
-    |> Enum.map(&convert_key_to_camel/1)
-    |> Enum.into(%{})
+    |> Map.new(&convert_key_to_camel/1)
     |> maybe_into_struct(struct)
   end
 
